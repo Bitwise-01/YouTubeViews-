@@ -1,211 +1,126 @@
-# Date: 08/16/2017
-# Distro: Kali Linux
-# Author: Ethical-H4CK3R
-# Description: YouTube Views Bot
-#
-#
-
-import os
-import time
-import random
-import urllib
-import argparse
-import threading
-import subprocess
-from platform import platform
-from core.tor import TorManager
+from os import path
+from sys import exit
+from time import sleep
+from core.tor import Tor
+from random import randint
+from subprocess import call
+from core.queue import Queue
+from threading import Thread
 from core.browser import Browser
+from argparse import ArgumentParser
+from commands import getoutput as shell
 
-class Instagram(TorManager,Browser):
- def __init__(self,urllist,views,minWatch,maxWatch):
-  self.url = None
-  self.urls = []
-  self.cache = {} # each url has its amount of visits {url:visits}
-  self.views = views
-  self.urllist = urllist
-  self.lock = threading.Lock()
-  self.minWatch = eval(minWatch)
-  self.maxWatch = eval(maxWatch)
+class Views(Browser, Tor):
 
-  self.ip = None # current ip address
-  self.index = 0 # going through url list
-  self.done = False # done with visits
-  self.wait = False # wait for connection
-  self.alive = True # is bruter still running
-  self.counts = eval(self.views) # the max visits per link
+ def __init__(self, urllist, visits, min, max):
 
-  self.attemptlist = [] # temporary storage; holds a max of 5 passwords
-  self.recentIps = [] # temporary storage; holds a max of 5 ip addresses
+  self.bots = 5 # max amount of bots to use
+  self.count = 0 # returning bots
+  self.ip = None
+  self.alive = True
+  self.targets = {} # {url: visits}
+  self.recentIPs = Queue(10)
 
-  Browser.__init__(self)
-  TorManager.__init__(self)
+  self.min = int(min)
+  self.max = int(max)
+  self.visits = int(visits)
 
-  self.n = '\033[0m'  # null ---> reset
-  self.r = '\033[31m' # red
-  self.g = '\033[32m' # green
-  self.y = '\033[33m' # yellow
-  self.b = '\033[34m' # blue
+  if not path.exists(urllist):
+   exit('Error: Unable to locate `{}`'.format(urllist))
 
- def kill(self):
-  if not any([not self.done,self.alive]):return
-  self.alive = False
-  self.done = True
-  print '\n  [-] Exiting {}...{}'.format(self.g,self.n)
-  try:self.stopTor()
-  finally:exit()
-
- def manageIps(self,rec=2):
-  ip = self.getIp()
-  if ip:
-   if ip in self.recentIps:
-    self.updateIp()
-    self.manageIps()
-   self.ip = ip
-   self.recentIps.append(ip)
-  else:
-   if rec:
-    self.updateIp()
-    self.manageIps(rec-1)
-   else:
-    self.connectionHandler()
-
- def readUrls(self):
-  with open(self.urllist,'r') as urlfile:
-   for url in urlfile:
-    url = url.replace('\n','')
-    self.cache[url] = 0
-   self.urls = [url for url in self.cache.keys()]
-
- def status(self):
-  done = [visit >= self.counts for visit in self.cache.values()]
-  self.done = True if all(done) else False
-  if self.done:self.kill()
-
- def getUrl(self):
-  self.status()
-  self.urls = [url for url in self.urls if self.cache[url] < self.counts]
-  self.index = self.index+1 if self.index < len(self.urls)-1 else 0
-  if self.urls[self.index] == self.url:self.getUrl()
-  return self.urls[self.index]
-
- def modifylist(self):
-  if len(self.recentIps) == 256:
-   del self.recentIps[0]
-
-  if len(self.recentIps) > 256:
-   while len(self.recentIps) > 255:
-    del self.recentIps[0]
-
- def changeIp(self):
-  self.createBrowser()
-  self.updateIp()
-
-  self.manageIps()
-  self.modifylist()
-  self.deleteBrowser()
-
- def setTries(self):
-  self.status()
-  self.url = self.getUrl()
-  while all([not self.done,self.alive]):
-   while all([self.alive,len(self.attemptlist)]):pass
-   if not len(self.attemptlist):
-    self.url = self.getUrl()
-    self.attemptlist.append(1)
-
-  # wait for left overs
-  while self.alive:
-   if not len(self.attemptlist):
-    self.alive = False
-
- def connectionHandler(self):
-  if self.wait:return
-  self.wait = True
-  print '\n  [-] Waiting For Connection {}...{}'.format(self.g,self.n)
-  while all([self.alive,self.wait]):
+  # read the url list
+  with open(urllist, 'r') as f:
    try:
-    self.updateIp()
-    urllib.urlopen('https://wtfismyip.com/text')
-    self.wait = False
-    break
-   except IOError:
-    time.sleep(1.5)
-  self.manageIps()
+    for url in [_ for _ in f.read().split('\n') if _]:
+     self.targets[url] = 0 # initial view
+   except Exception as err:exit('Error:', err)
 
- def attempt(self,attempt):
-  with self.lock:
-   self.status()
-   self.createBrowser()
-   html = self.watch()
-   self.deleteBrowser()
-   if html:
-    self.cache[self.url]+=1
-    del self.attemptlist[0]
+ def display(self, url):
+  n = '\033[0m'  # null ---> reset
+  r = '\033[31m' # red
+  g = '\033[32m' # green
+  y = '\033[33m' # yellow
+  b = '\033[34m' # blue
 
- def run(self):
-  self.readUrls()
-  threading.Thread(target=self.setTries).start()
-  self.display()
-  time.sleep(1.3)
-  while self.alive:
-   bot = None # workers
-
-   for attempt in self.attemptlist:
-    bot = threading.Thread(target=self.attempt,args=[attempt])
-    bot.start()
-   self.status()
-
-  # wait for bot
-   if bot:
-    while all([self.alive,bot.is_alive()]):pass
-    if self.alive:
-     self.changeIp()
-
- def display(self):
-  ip = self.ip if self.ip else ''
-  attempts = self.cache[self.url]+1 if self.url else ''
-
-  subprocess.call(['clear'])
+  call('clear')
   print ''
   print '  +------ Youtube Views ------+'
-  print '  [-] Url: {}{}{}'.format(self.g,self.url,self.n)
-  print '  [-] Proxy IP: {}{}{}'.format(self.b,ip,self.n)
-  print '  [-] Visits: {}{}{}'.format(self.y,attempts,self.n)
+  print '  [-] Url: {}{}{}'.format(g, url, n)
+  print '  [-] Proxy IP: {}{}{}'.format(b, self.ip, n)
+  print '  [-] Visits: {}{}{}'.format(y, self.targets[url], n)
 
-  if not ip:
-   print '\n  [-] Obtaining Proxy IP {}...{}'.format(self.g,self.n)
-   self.changeIp()
-   time.sleep(1.3)
-   self.display()
+ def visit(self, url):
+  try:
+   if self.watch(url):
+    views = self.targets[url]
+    self.targets[url] = views + 1
+  except:pass
+  finally:self.count -= 1
 
-def main():
- # assign arugments
- args = argparse.ArgumentParser()
- args.add_argument('visits',help='The amount of visits')
+ def connection(self):
+  try:
+   br = self.createBrowser()
+   br.open('https://example.com', timeout=2.5)
+   br.close()
+  except:
+   print 'Error: Unable to access the internet'
+   self.exit()
+
+ def exit(self):
+  self.alive = False
+  self.stopTor()
+
+ def run(self):
+  ndex = 0
+  while all([self.alive, len(self.targets)]):
+   urls = [] # tmp list of the urls that are being visited
+   self.restartTor()
+   if not self.ip:continue
+
+   for _ in range(self.bots):
+    try:
+     url = [_ for _ in self.targets][ndex]
+    except IndexError:return
+    view = self.targets[url]
+    if view >= self.visits:
+     del self.targets[url]
+     continue
+
+    if url in urls:continue # prevent wrapping
+    ndex = ndex+1 if ndex < len(self.targets)-1 else 0
+    Thread(target=self.visit, args=[url]).start()
+    urls.append(url)
+    self.count += 1
+    sleep(1)
+
+   while all([self.count, self.alive]):
+    for url in urls:
+     try:
+      self.display(url)
+      [sleep(1) for _ in range(7) if all([self.count, self.alive])]
+     except:
+      self.exit()
+
+if __name__ == '__main__':
+
+ # arguments
+ args = ArgumentParser()
+ args.add_argument('visits',help='The amount of visits ex: 300')
  args.add_argument('urllist',help='Youtube videos url list')
  args.add_argument('min',help='Minimum watch time in seconds ex: 38')
  args.add_argument('max',help='Maximum watch time in seconds ex: 65')
  args = args.parse_args()
 
- # assign variables
- engine = Instagram(args.urllist,args.visits,args.min,args.max)
+ youtube_views = Views(args.urllist, args.visits, args.min, args.max)
 
  # does tor exists?
- if not os.path.exists('/usr/sbin/tor'):
-  try:engine.installTor()
-  except KeyboardInterrupt:engine.kill('Exiting {}...{}'.format(self.g,self.n))
-  if not os.path.exists('/usr/sbin/tor'):
-   engine.kill('Please Install Tor'.format(engine.y,engine.r,engine.n))
+ if not path.exists('/usr/sbin/tor'):
+  try:youtube_views.installTor()
+  except KeyboardInterrupt:exit('Exiting ...')
+  if all([not path.exists('/usr/sbin/tor'), youtube_views.alive]):
+   exit('Please Install Tor')
 
- # start
- try:engine.run()
- finally:engine.kill()
-
-if __name__ == '__main__':
- if not 'kali' in platform():
-  exit('Kali Linux required')
-
- if os.getuid():
-  exit('root access required')
- else:
-  main()
+ try:youtube_views.run()
+ except Exception as error:
+  print 'Error:',error
+  youtube_views.exit()

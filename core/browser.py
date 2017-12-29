@@ -1,11 +1,13 @@
-import time
 import random
 import cookielib
 import mechanize
+from time import sleep
+from string import ascii_letters
 
 class Browser(object):
+
  def __init__(self):
-  self.br = None
+  super(Browser, self).__init__()
 
  def createBrowser(self):
   br = mechanize.Browser()
@@ -16,32 +18,27 @@ class Browser(object):
   br.set_cookiejar(cookielib.LWPCookieJar())
   br.addheaders=[('User-agent',self.useragent())]
   br.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(),max_time=1)
-  self.br = br
+  return br
 
- def deleteBrowser(self):
-  self.br.close()
-  del self.br
-
- def getIp(self):
-  try:
-   return self.br.open('http://wtfismyip.com/text',timeout=35.0).read().replace('\n','')
-  except KeyboardInterrupt:self.kill()
-  except:return
-
- def watch(self):
+ def watch(self, url):
   if not self.alive:
    return
 
   try:
-   self.display()
-   html = self.br.open(self.url,timeout=35.0)
+   br = self.createBrowser()
+   if not br.open(url, timeout=5.0).read():return
 
-   sleepTime = random.randint(self.minWatch,self.maxWatch)
-   for _ in range(sleepTime):
-    if not self.alive:break
-    time.sleep(1)
+   sleepTime = random.randint(self.min, self.max)
+   [sleep(1) for _ in range(sleepTime) if self.alive] # watching the video
 
-   return html.read()
+   # search for something random
+   br.select_form(nr=1)
+   br.form['search_query'] = random.choice([_ for _ in ascii_letters])
+
+   sleep(0.5)
+   br.submit()
+   br.close()
+   return True
   except:return
 
  def useragent(self):

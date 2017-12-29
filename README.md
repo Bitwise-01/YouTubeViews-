@@ -1,8 +1,13 @@
 # Usage
-## python youtube.py [visits] [youtubeLinks.txt] [minWatch] [maxWatch]
+```sh
+ $ python youtube.py [visits] [youtubeLinks.txt] [minWatch] [maxWatch]
+ ```
 
-### Example
-  * python youtube.py 300 urls.txt 38 65
+# Help
+ - **visits** The amount of visits per video
+ - **youtubeLinks** The file that contains the Youtube links; one link per line
+ - **minWatch** The minimum watch time in seconds
+ - **maxWatch** The maximum watch time in seconds
 
-### Visits don't equal views
-  * The script just visits the link & watches the video, YouTube makes the decision on whether or not a visit is a view.
+# Example
+ - python youtube.py 300 urls.txt 38 65
