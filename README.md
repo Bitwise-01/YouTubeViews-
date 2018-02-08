@@ -1,3 +1,5 @@
+### No longer maintained
+
 # Usage
 ```sh
  $ python youtube.py [visits] [youtubeLinks.txt] [minWatch] [maxWatch]
