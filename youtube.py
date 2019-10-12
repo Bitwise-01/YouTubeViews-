@@ -1,14 +1,16 @@
+from argparse import ArgumentParser
 from os import path
-from sys import exit
-from time import sleep
-from core.tor import Tor
 from random import randint
 from subprocess import call
-from core.queue import Queue
-from threading import Thread
-from core.browser import Browser
-from argparse import ArgumentParser
 from subprocess import getoutput as shell
+from sys import exit
+from threading import Thread
+from time import sleep
+
+from core.browser import Browser
+from core.queue import Queue
+from core.tor import Tor
+
 
 class Views(Browser, Tor):
 

@@ -1,6 +1,9 @@
-import socket, socks
-from time import sleep
+import socks
+import socket
+
 from subprocess import getoutput as shell
+from time import sleep
+
 
 class Tor(object):
 

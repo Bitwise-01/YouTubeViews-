@@ -1,5 +1,6 @@
 from requests import get as urlopen
 
+
 class IP(object):
  ''' Provides clean IP addresses '''
 

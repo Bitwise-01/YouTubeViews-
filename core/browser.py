@@ -1,8 +1,10 @@
-import random
 import http.cookiejar
 import mechanize
-from time import sleep
+import random
+
 from string import ascii_letters
+from time import sleep
+
 
 class Browser(object):
 

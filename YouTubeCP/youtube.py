@@ -1,15 +1,17 @@
-from os import path
-from sys import exit
-from time import sleep
-from lib.spyder import IP
-from random import randint
-from subprocess import call
-from platform import system
-from lib.queue import Queue
-from threading import Thread
-from lib.browser import Browser
 from argparse import ArgumentParser
+from os import path
+from platform import system
+from random import randint
 from requests import get as urlopen
+from subprocess import call
+from sys import exit
+from threading import Thread
+from time import sleep
+
+from lib.browser import Browser
+from lib.queue import Queue
+from lib.spyder import IP
+
 
 class Views(Browser):
 
