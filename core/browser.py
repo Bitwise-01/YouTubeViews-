@@ -1,5 +1,5 @@
 import random
-import cookielib
+import http.cookiejar
 import mechanize
 from time import sleep
 from string import ascii_letters
@@ -15,7 +15,7 @@ class Browser(object):
   br.set_handle_referer(True)
   br.set_handle_robots(False)
   br.set_handle_refresh(False)
-  br.set_cookiejar(cookielib.LWPCookieJar())
+  br.set_cookiejar(http.cookiejar.LWPCookieJar())
   br.addheaders=[('User-agent',self.useragent())]
   br.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(),max_time=1)
   return br

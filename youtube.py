@@ -8,7 +8,7 @@ from core.queue import Queue
 from threading import Thread
 from core.browser import Browser
 from argparse import ArgumentParser
-from commands import getoutput as shell
+from subprocess import getoutput as shell
 
 class Views(Browser, Tor):
 
@@ -43,11 +43,11 @@ class Views(Browser, Tor):
   b = '\033[34m' # blue
 
   call('clear')
-  print ''
-  print '  +------ Youtube Views ------+'
-  print '  [-] Url: {}{}{}'.format(g, url, n)
-  print '  [-] Proxy IP: {}{}{}'.format(b, self.ip, n)
-  print '  [-] Visits: {}{}{}'.format(y, self.targets[url], n)
+  print('')
+  print('  +------ Youtube Views ------+')
+  print('  [-] Url: {}{}{}'.format(g, url, n))
+  print('  [-] Proxy IP: {}{}{}'.format(b, self.ip, n))
+  print('  [-] Visits: {}{}{}'.format(y, self.targets[url], n))
 
  def visit(self, url):
   try:
@@ -63,7 +63,7 @@ class Views(Browser, Tor):
    br.open('https://example.com', timeout=2.5)
    br.close()
   except:
-   print 'Error: Unable to access the internet'
+   print('Error: Unable to access the internet')
    self.exit()
 
  def exit(self):
@@ -122,5 +122,5 @@ if __name__ == '__main__':
 
  try:youtube_views.run()
  except Exception as error:
-  print 'Error:',error
+  print('Error:',error)
   youtube_views.exit()

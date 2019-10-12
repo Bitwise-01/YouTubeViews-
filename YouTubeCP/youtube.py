@@ -50,11 +50,11 @@ class Views(Browser):
   b = '\033[34m' # blue
 
   call([cls])
-  print ''
-  print '  +------ Youtube Views ------+'
-  print '  [-] Url: {}{}{}'.format(g, url, n)
-  print '  [-] Proxy IP: {}{}{}'.format(b, self.ip['ip'], n)
-  print '  [-] Visits: {}{}{}'.format(y, self.targets[url], n)
+  print('')
+  print('  +------ Youtube Views ------+')
+  print('  [-] Url: {}{}{}'.format(g, url, n))
+  print('  [-] Proxy IP: {}{}{}'.format(b, self.ip['ip'], n))
+  print('  [-] Visits: {}{}{}'.format(y, self.targets[url], n))
   if not self.alive:self.exit()
 
  def visit(self, url):
@@ -71,7 +71,7 @@ class Views(Browser):
 
  def connection(self):
   connected = False
-  for _ in xrange(3):
+  for _ in range(3):
    try:
 
     if not self.alive:self.exit()
@@ -80,7 +80,7 @@ class Views(Browser):
     break
    except:pass
   if not connected:
-   print 'Error: No Connection!'
+   print('Error: No Connection!')
    self.exit()
 
  def change_ip(self, ip):
@@ -117,7 +117,7 @@ class Views(Browser):
      self.updateIp()
      if not self.ip:
       call([cls])
-      print 'Working on obtaining a clean IP ...'
+      print('Working on obtaining a clean IP ...')
      sleep(5)
      continue
    except KeyboardInterrupt:self.exit()

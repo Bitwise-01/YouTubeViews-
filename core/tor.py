@@ -1,6 +1,6 @@
 import socket, socks
 from time import sleep
-from commands import getoutput as shell
+from subprocess import getoutput as shell
 
 class Tor(object):
 
@@ -18,7 +18,7 @@ class Tor(object):
  def installTor(self):
   self.connection()
   if not self.alive:return
-  print 'Installing Tor ...'
+  print('Installing Tor ...')
   shell('echo "deb http://http.kali.org/kali kali-rolling main contrib non-free" > /etc/apt/sources.list \
          && apt-get update && apt-get install tor -y && apt autoremove -y')
 
@@ -42,7 +42,7 @@ class Tor(object):
   try:
    ip = self.getIp()
    if all([not ip, recur]):
-    print 'Error: Network unreachable'
+    print('Error: Network unreachable')
     reset_counts = 2
     for _ in range(30):
      if not self.alive:return
