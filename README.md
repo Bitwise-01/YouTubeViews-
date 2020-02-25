@@ -1,8 +1,9 @@
+
 ### No longer maintained
 
 # Usage
 ```sh
- $ python youtube.py [visits] [youtubeLinks.txt] [minWatch] [maxWatch]
+ $ python youtube.py [visits500] [youtube git clone link.txt] [minWatch] [maxWatch]
  ```
 
 # Help
@@ -13,3 +14,6 @@
 
 # Example
  - python youtube.py 300 urls.txt 38 65
+https://www.youtube.com/watch?v=Tb08hLnSLbY&feature=share
+paython youtubepy 300
+pentestCore.txt 38 65
