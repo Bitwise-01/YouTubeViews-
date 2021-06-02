@@ -6,5 +6,5 @@ mechanize==0.4.3
 PySocks==1.7.1
 requests==2.22.0
 six==1.12.0
-urllib3==1.25.6
+urllib3==1.26.5
 webencodings==0.5.1
