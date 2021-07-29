@@ -2,7 +2,10 @@ from argparse import ArgumentParser
 from os import path
 from random import randint
 from subprocess import call
-from subprocess import getoutput as shell
+try:
+    from subprocess import getoutput as shell
+except ImportError:
+    from commands import getoutput as shell
 from sys import exit
 from threading import Thread
 from time import sleep
