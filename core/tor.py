@@ -1,7 +1,10 @@
 import socks
 import socket
 
-from subprocess import getoutput as shell
+try:
+    from subprocess import getoutput as shell
+except ImportError:
+    from commands import getoutput as shell
 from time import sleep
 
 
